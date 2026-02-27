@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <%- include('../partials/header') %>
+    
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Left Column: Edit Form -->
+            <div class="col-md-7 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h4 class="mb-0 fw-bold">Edit Question Details</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="editQuestionForm" action="/questions/<%= question._id %>?_method=PUT" method="POST">
+                            <div class="mb-3">
+                                <label for="text" class="form-label">Question Text</label>
+                                <textarea class="form-control" id="text" name="text" rows="2" required><%= question.text || question.content %></textarea>
+                            </div>
+
+                            <label class="form-label">Options</label>
+                            <div id="options-container">
+                                <% 
+                                   let options = question.options || [];
+                                   let correctIndex = (typeof question.correctAnswerIndex === 'number') ? question.correctAnswerIndex : -1;
+                                   
+                                   for(let i=0; i<4; i++) {
+                                     let optText = '';
+                                     if(options[i]) {
+                                        optText = typeof options[i] === 'string' ? options[i] : options[i].text;
+                                     }
+                                     let isCorrect = (i === correctIndex);
+                                %>
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0" type="radio" name="correctIndex" value="<%= i %>" aria-label="Correct answer" <%= isCorrect ? 'checked' : '' %>>
+                                    </div>
+                                    <input type="text" class="form-control" name="options[]" placeholder="Option <%= i+1 %>" value="<%= optText %>" required>
+                                </div>
+                                <% } %>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <button type="button" id="btnCancel" class="btn btn-secondary me-md-2" onclick="handleCancel()">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Update Question</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Quiz Associations -->
+            <div class="col-md-5">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0 fw-bold">Belongs to Quizzes</h5>
+                    </div>
+                    <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
+                        <% if (associatedQuizzes && associatedQuizzes.length > 0) { %>
+                            <% associatedQuizzes.forEach(quiz => { %>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span class="fw-medium"><%= quiz.title %></span>
+                                    <form action="/questions/<%= question._id %>/remove-from-quiz" method="POST" class="d-inline">
+                                        <input type="hidden" name="quizId" value="<%= quiz._id %>">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove from this Quiz">
+                                            <i class="bi bi-x-lg">Remove</i>
+                                        </button>
+                                    </form>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div class="p-3 text-center text-muted">Not used in any quizzes.</div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0 fw-bold">Add to Quiz</h5>
+                    </div>
+                    <div class="card-body">
+                        <% if (availableQuizzes && availableQuizzes.length > 0) { %>
+                            <div class="list-group list-group-flush" style="max-height: 250px; overflow-y: auto;">
+                                <% availableQuizzes.forEach(quiz => { %>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-truncate" style="max-width: 200px;"><%= quiz.title %></span>
+                                        <form action="/questions/<%= question._id %>/add-to-quiz" method="POST" class="d-inline">
+                                            <input type="hidden" name="quizId" value="<%= quiz._id %>">
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Add to Quiz">
+                                                <i class="bi bi-plus-lg">+ Add to</i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <div class="alert alert-info mb-0">No other quizzes available.</div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unsaved Changes Modal -->
+    <div class="modal fade" id="unsavedChangesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Unsaved Changes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    You have unsaved changes. Are you sure you want to leave without saving?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Stay Here</button>
+                    <a href="/questions" class="btn btn-danger">Discard Changes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let isDirty = false;
+        const form = document.getElementById('editQuestionForm');
+        
+        // Track changes
+        form.addEventListener('change', () => { isDirty = true; });
+        form.addEventListener('input', () => { isDirty = true; });
+
+        // Allow submit without warning
+        form.addEventListener('submit', () => { isDirty = false; });
+
+        // Browser native warning (closing tab/reload)
+        window.addEventListener('beforeunload', (e) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Custom Cancel Button Handler
+        function handleCancel() {
+            if (isDirty) {
+                const modal = new bootstrap.Modal(document.getElementById('unsavedChangesModal'));
+                modal.show();
+            } else {
+                window.location.href = '/questions'; // Or history.back()
+            }
+        }
+    </script>
+</body>
+</html>

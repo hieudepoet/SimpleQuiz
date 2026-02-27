@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <%- include('../partials/header') %>
+    
+    <div class="container mt-4">
+        <div class="mb-4">
+            <a href="/questions" class="text-decoration-none text-muted mb-2 d-inline-block">&larr; Back to List</a>
+            <h2 class="fw-bold">Question Details</h2>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title mb-4"><%= question.text || question.content %></h4>
+                
+                <h6 class="text-muted mb-3">Options:</h6>
+                <ul class="list-group list-group-flush mb-4">
+                    <% (question.options || []).forEach((opt, index) => { 
+                        const isCorrect = (index === question.correctAnswerIndex);
+                    %>
+                        <li class="list-group-item <%= isCorrect ? 'list-group-item-success' : '' %>">
+                            <%= opt %>
+                            <% if(isCorrect) { %> <span class="badge bg-success float-end">Correct Answer</span> <% } %>
+                        </li>
+                    <% }) %>
+                </ul>
+
+                <h6 class="text-muted mb-3">Belongs to Quizzes:</h6>
+                <% if (associatedQuizzes && associatedQuizzes.length > 0) { %>
+                    <ul class="list-group list-group-flush mb-4">
+                        <% associatedQuizzes.forEach(quiz => { %>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="/quizzes/<%= quiz._id %>" class="text-decoration-none"><%= quiz.title %></a>
+                            </li>
+                        <% }) %>
+                    </ul>
+                <% } else { %>
+                    <p class="text-muted fst-italic mb-4">Not assigned to any quiz.</p>
+                <% } %>
+
+                <div class="d-flex gap-2">
+                    <a href="/questions/<%= question._id %>/edit" class="btn btn-warning">Edit</a>
+                    <form action="/questions/<%= question._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirmSubmit('Are you sure you want to delete this question? This action cannot be undone.', this);">
+                        <button type="submit" class="btn btn-outline-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

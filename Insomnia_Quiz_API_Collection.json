@@ -1,0 +1,595 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2024-02-04T01:46:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "wrk_quiz_app",
+      "_type": "workspace",
+      "name": "Quiz App - User Authentication",
+      "description": "Complete API testing for Quiz Application with JWT Authentication",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3000/api",
+        "admin_token": "",
+        "user_token": ""
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url", "admin_token", "user_token"]
+      },
+      "parentId": "wrk_quiz_app"
+    },
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "name": "1. Authentication",
+      "description": "User registration and login endpoints",
+      "parentId": "wrk_quiz_app"
+    },
+    {
+      "_id": "req_signup_regular",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Signup - Regular User",
+      "description": "Create a new regular user account",
+      "url": "{{ _.base_url }}/auth/signup",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"regular_user\",\n  \"password\": \"password123\",\n  \"admin\": false\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_signup_admin",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Signup - Admin User",
+      "description": "Create a new admin user account",
+      "url": "{{ _.base_url }}/auth/signup",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"admin_user\",\n  \"password\": \"admin123\",\n  \"admin\": true\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_login_regular",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login - Regular User",
+      "description": "Login as regular user and get JWT token. Copy the token to user_token environment variable!",
+      "url": "{{ _.base_url }}/auth/login",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"regular_user\",\n  \"password\": \"password123\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_login_admin",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login - Admin User",
+      "description": "Login as admin and get JWT token. Copy the token to admin_token environment variable!",
+      "url": "{{ _.base_url }}/auth/login",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"admin_user\",\n  \"password\": \"admin123\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "fld_users",
+      "_type": "request_group",
+      "name": "2. Users (Admin Only)",
+      "description": "User management endpoints - Admin only",
+      "parentId": "wrk_quiz_app"
+    },
+    {
+      "_id": "req_users_admin",
+      "_type": "request",
+      "parentId": "fld_users",
+      "name": "Get All Users - Admin ✓",
+      "description": "Get all registered users (Admin only) - Should succeed",
+      "url": "{{ _.base_url }}/users",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.admin_token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_users_regular",
+      "_type": "request",
+      "parentId": "fld_users",
+      "name": "Get All Users - Regular User ✗",
+      "description": "Try to get users as regular user - Should fail with 403",
+      "url": "{{ _.base_url }}/users",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.user_token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_users_no_auth",
+      "_type": "request",
+      "parentId": "fld_users",
+      "name": "Get All Users - No Auth ✗",
+      "description": "Try to get users without token - Should fail with 401",
+      "url": "{{ _.base_url }}/users",
+      "method": "GET"
+    },
+    {
+      "_id": "fld_quizzes",
+      "_type": "request_group",
+      "name": "3. Quizzes",
+      "description": "Quiz management endpoints",
+      "parentId": "wrk_quiz_app"
+    },
+    {
+      "_id": "fld_quizzes_public",
+      "_type": "request_group",
+      "name": "Public Endpoints",
+      "description": "Anyone can access these",
+      "parentId": "fld_quizzes"
+    },
+    {
+      "_id": "req_quiz_get_all",
+      "_type": "request",
+      "parentId": "fld_quizzes_public",
+      "name": "Get All Quizzes",
+      "description": "Public endpoint - No authentication required",
+      "url": "{{ _.base_url }}/quizzes",
+      "method": "GET"
+    },
+    {
+      "_id": "req_quiz_get_one",
+      "_type": "request",
+      "parentId": "fld_quizzes_public",
+      "name": "Get Quiz by ID",
+      "description": "Public endpoint - Replace :quizId with actual ID",
+      "url": "{{ _.base_url }}/quizzes/65f9876543210fedcba98765",
+      "method": "GET"
+    },
+    {
+      "_id": "req_quiz_get_populated_capital",
+      "_type": "request",
+      "parentId": "fld_quizzes_public",
+      "name": "Get Question inlcude 'capital'",
+      "description": "Get quiz with populated question details",
+      "url": "{{ _.base_url }}/quizzes/65f9876543210fedcba98765/populate",
+      "method": "GET"
+    },
+    {
+      "_id": "fld_quizzes_admin",
+      "_type": "request_group",
+      "name": "Admin Only Endpoints",
+      "description": "Only admins can access these",
+      "parentId": "fld_quizzes"
+    },
+    {
+      "_id": "req_quiz_create_admin",
+      "_type": "request",
+      "parentId": "fld_quizzes_admin",
+      "name": "Create Quiz - Admin ✓",
+      "description": "Create a new quiz as admin - Should succeed",
+      "url": "{{ _.base_url }}/quizzes",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"React Fundamentals\",\n  \"description\": \"Test your React knowledge\",\n  \"questions\": []\n}"
+      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.admin_token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_quiz_create_user",
+      "_type": "request",
+      "parentId": "fld_quizzes_admin",
+      "name": "Create Quiz - Regular User ✗",
+      "description": "Try to create quiz as regular user - Should fail with 403",
+      "url": "{{ _.base_url }}/quizzes",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Unauthorized Quiz\",\n  \"description\": \"This should fail\",\n  \"questions\": []\n}"
+      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.user_token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_quiz_update_admin",
+      "_type": "request",
+      "parentId": "fld_quizzes_admin",
+      "name": "Update Quiz - Admin ✓",
+      "description": "Update quiz as admin - Should succeed",
+      "url": "{{ _.base_url }}/quizzes/65f9876543210fedcba98765",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"React Advanced\",\n  \"description\": \"Advanced React concepts\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.admin_token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_quiz_update_user",
+      "_type": "request",
+      "parentId": "fld_quizzes_admin",
+      "name": "Update Quiz - Regular User ✗",
+      "description": "Try to update quiz as regular user - Should fail with 403",
+      "url": "{{ _.base_url }}/quizzes/65f9876543210fedcba98765",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Unauthorized Update\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.user_token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_quiz_delete_admin",
+      "_type": "request",
+      "parentId": "fld_quizzes_admin",
+      "name": "Delete Quiz - Admin ✓",
+      "description": "Delete quiz as admin - Should succeed",
+      "url": "{{ _.base_url }}/quizzes/65f9876543210fedcba98765",
+      "method": "DELETE",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.admin_token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_quiz_delete_user",
+      "_type": "request",
+      "parentId": "fld_quizzes_admin",
+      "name": "Delete Quiz - Regular User ✗",
+      "description": "Try to delete quiz as regular user - Should fail with 403",
+      "url": "{{ _.base_url }}/quizzes/65f9876543210fedcba98765",
+      "method": "DELETE",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.user_token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_quiz_add_question_admin",
+      "_type": "request",
+      "parentId": "fld_quizzes_admin",
+      "name": "Add Question to Quiz - Admin ✓",
+      "description": "Add a single question to quiz as admin",
+      "url": "{{ _.base_url }}/quizzes/65f9876543210fedcba98765/question",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"text\": \"What is useState hook?\",\n  \"options\": [\"A hook for state\", \"A hook for effect\", \"A hook for ref\", \"A hook for context\"],\n  \"keywords\": [\"react\", \"hooks\", \"useState\"],\n  \"correctAnswerIndex\": 0\n}"
+      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.admin_token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_quiz_add_questions_admin",
+      "_type": "request",
+      "parentId": "fld_quizzes_admin",
+      "name": "Add Multiple Questions - Admin ✓",
+      "description": "Add multiple questions to quiz as admin",
+      "url": "{{ _.base_url }}/quizzes/65f9876543210fedcba98765/questions",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "[\n  {\n    \"text\": \"What is useEffect?\",\n    \"options\": [\"For side effects\", \"For state\", \"For ref\", \"For context\"],\n    \"keywords\": [\"react\", \"hooks\"],\n    \"correctAnswerIndex\": 0\n  },\n  {\n    \"text\": \"What is JSX?\",\n    \"options\": [\"JavaScript XML\", \"Java Syntax\", \"JSON XML\", \"None\"],\n    \"keywords\": [\"react\", \"jsx\"],\n    \"correctAnswerIndex\": 0\n  }\n]"
+      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.admin_token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "fld_questions",
+      "_type": "request_group",
+      "name": "4. Questions",
+      "description": "Question management endpoints",
+      "parentId": "wrk_quiz_app"
+    },
+    {
+      "_id": "fld_questions_public",
+      "_type": "request_group",
+      "name": "Public Endpoints",
+      "description": "Anyone can access these",
+      "parentId": "fld_questions"
+    },
+    {
+      "_id": "req_question_get_all",
+      "_type": "request",
+      "parentId": "fld_questions_public",
+      "name": "Get All Questions",
+      "description": "Public endpoint - No authentication required",
+      "url": "{{ _.base_url }}/questions",
+      "method": "GET"
+    },
+    {
+      "_id": "req_question_get_one",
+      "_type": "request",
+      "parentId": "fld_questions_public",
+      "name": "Get Question by ID",
+      "description": "Public endpoint - Replace :questionId with actual ID",
+      "url": "{{ _.base_url }}/questions/65fa111111111111111111",
+      "method": "GET"
+    },
+    {
+      "_id": "fld_questions_auth",
+      "_type": "request_group",
+      "name": "Authenticated Endpoints",
+      "description": "Requires authentication",
+      "parentId": "fld_questions"
+    },
+    {
+      "_id": "req_question_create_user",
+      "_type": "request",
+      "parentId": "fld_questions_auth",
+      "name": "Create Question - Regular User ✓",
+      "description": "Create a question as regular user - Should succeed (user becomes author)",
+      "url": "{{ _.base_url }}/questions",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"text\": \"What is async/await?\",\n  \"options\": [\"Async programming\", \"Sync programming\", \"Both\", \"None\"],\n  \"keywords\": [\"javascript\", \"async\"],\n  \"correctAnswerIndex\": 0\n}"
+      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.user_token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_question_create_admin",
+      "_type": "request",
+      "parentId": "fld_questions_auth",
+      "name": "Create Question - Admin ✓",
+      "description": "Create a question as admin - Should succeed (admin becomes author)",
+      "url": "{{ _.base_url }}/questions",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"text\": \"What is closure in JavaScript?\",\n  \"options\": [\"Function with access to outer scope\", \"A loop\", \"A variable\", \"None\"],\n  \"keywords\": [\"javascript\", \"closure\"],\n  \"correctAnswerIndex\": 0\n}"
+      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.admin_token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_question_create_no_auth",
+      "_type": "request",
+      "parentId": "fld_questions_auth",
+      "name": "Create Question - No Auth ✗",
+      "description": "Try to create question without token - Should fail with 401",
+      "url": "{{ _.base_url }}/questions",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"text\": \"Unauthorized question\",\n  \"options\": [\"A\", \"B\", \"C\", \"D\"],\n  \"keywords\": [],\n  \"correctAnswerIndex\": 0\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "fld_questions_author",
+      "_type": "request_group",
+      "name": "Author Only Endpoints",
+      "description": "Only the question author can perform these operations",
+      "parentId": "fld_questions"
+    },
+    {
+      "_id": "req_question_update_author",
+      "_type": "request",
+      "parentId": "fld_questions_author",
+      "name": "Update Question - Author ✓",
+      "description": "Update own question - Should succeed (use user_token if user created it)",
+      "url": "{{ _.base_url }}/questions/65fa111111111111111111",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"text\": \"Updated: What is async/await in JavaScript?\",\n  \"options\": [\"Async programming\", \"Sync programming\", \"Both\", \"None\"],\n  \"correctAnswerIndex\": 0\n}"
+      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.user_token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_question_update_not_author",
+      "_type": "request",
+      "parentId": "fld_questions_author",
+      "name": "Update Question - Not Author ✗",
+      "description": "Try to update another user's question - Should fail with 403 (use admin_token to try to update user's question)",
+      "url": "{{ _.base_url }}/questions/65fa111111111111111111",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"text\": \"Unauthorized update\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.admin_token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "req_question_delete_author",
+      "_type": "request",
+      "parentId": "fld_questions_author",
+      "name": "Delete Question - Author ✓",
+      "description": "Delete own question - Should succeed",
+      "url": "{{ _.base_url }}/questions/65fa111111111111111111",
+      "method": "DELETE",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.user_token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_question_delete_not_author",
+      "_type": "request",
+      "parentId": "fld_questions_author",
+      "name": "Delete Question - Not Author ✗",
+      "description": "Try to delete another user's question - Should fail with 403",
+      "url": "{{ _.base_url }}/questions/65fa111111111111111111",
+      "method": "DELETE",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.admin_token }}"
+        }
+      ]
+    },
+    {
+      "_id": "fld_test_scenarios",
+      "_type": "request_group",
+      "name": "5. Test Scenarios",
+      "description": "Complete testing workflows",
+      "parentId": "wrk_quiz_app"
+    },
+    {
+      "_id": "req_test_scenario_1",
+      "_type": "request",
+      "parentId": "fld_test_scenarios",
+      "name": "📋 SCENARIO 1: Setup Users",
+      "description": "Step 1: Create regular and admin users, then login to get tokens. Copy tokens to environment variables!",
+      "url": "{{ _.base_url }}/auth/signup",
+      "method": "GET"
+    },
+    {
+      "_id": "req_test_scenario_2",
+      "_type": "request",
+      "parentId": "fld_test_scenarios",
+      "name": "📋 SCENARIO 2: Test Admin Privileges",
+      "description": "Step 2: Test that admin can create quizzes and regular user cannot",
+      "url": "{{ _.base_url }}/quizzes",
+      "method": "GET"
+    },
+    {
+      "_id": "req_test_scenario_3",
+      "_type": "request",
+      "parentId": "fld_test_scenarios",
+      "name": "📋 SCENARIO 3: Test Author Authorization",
+      "description": "Step 3: Create a question as regular user, then try to update/delete as admin (should fail)",
+      "url": "{{ _.base_url }}/questions",
+      "method": "GET"
+    }
+  ]
+}

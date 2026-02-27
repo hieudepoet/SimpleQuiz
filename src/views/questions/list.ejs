@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <%- include('../partials/header') %>
+    
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-primary">Question Bank</h2>
+            <a href="/questions/new" class="btn btn-success"><i class="bi bi-plus-lg"></i> + Add Question</a>
+        </div>
+        
+        <div class="table-responsive bg-white shadow-sm rounded">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" style="width: 5%">#</th>
+                        <th scope="col" style="width: 50%">Question Text</th>
+                        <th scope="col" style="width: 25%">Correct Answer</th>
+                        <th scope="col" class="text-end" style="width: 20%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (questions && questions.length > 0) { %>
+                        <% questions.forEach((question, index) => { %>
+                            <tr>
+                                <th scope="row"><%= index + 1 %></th>
+                                <td><%= question.text || question.content %></td> <!-- Adjust based on actual model -->
+                                <td>
+                                    <!-- Logic to find correct answer -->
+                                    <% 
+                                      let correct = 'N/A';
+                                      if (question.options && typeof question.correctAnswerIndex === 'number' && question.options[question.correctAnswerIndex]) {
+                                          correct = question.options[question.correctAnswerIndex];
+                                      }
+                                    %>
+                                    <span class="badge bg-success bg-opacity-10 text-success"><%= correct %></span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="/questions/<%= question._id %>" class="btn btn-sm btn-outline-primary">View</a>
+                                    <a href="/questions/<%= question._id %>/edit" class="btn btn-sm btn-outline-warning">Edit</a>
+                                    <form action="/questions/<%= question._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirmSubmit('Are you sure you want to delete this question?', this);">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">No questions found.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <%- include('../partials/header') %>
+    
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h4 class="mb-0 fw-bold">Add Question</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/questions" method="POST">
+                            <div class="mb-3">
+                                <label for="text" class="form-label">Question Text</label>
+                                <textarea class="form-control" id="text" name="text" rows="2" required placeholder="Enter the question"></textarea>
+                            </div>
+
+                            <label class="form-label">Options</label>
+                            <div id="options-container">
+                                <!-- Option 1 -->
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0" type="radio" name="correctIndex" value="0" aria-label="Correct answer" required>
+                                    </div>
+                                    <input type="text" class="form-control" name="options[]" placeholder="Option 1" required>
+                                </div>
+                                <!-- Option 2 -->
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0" type="radio" name="correctIndex" value="1" aria-label="Correct answer">
+                                    </div>
+                                    <input type="text" class="form-control" name="options[]" placeholder="Option 2" required>
+                                </div>
+                                <!-- Option 3 -->
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0" type="radio" name="correctIndex" value="2" aria-label="Correct answer">
+                                    </div>
+                                    <input type="text" class="form-control" name="options[]" placeholder="Option 3" required>
+                                </div>
+                                <!-- Option 4 -->
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0" type="radio" name="correctIndex" value="3" aria-label="Correct answer">
+                                    </div>
+                                    <input type="text" class="form-control" name="options[]" placeholder="Option 4" required>
+                                </div>
+                            </div>
+                            
+                            <!-- Optional: Quiz selection if we want to add directly to a quiz -->
+                            <div class="mb-3 mt-3">
+                                <label for="quizId" class="form-label">Assign to Quiz (Optional)</label>
+                                <select class="form-select" id="quizId" name="quizId">
+                                    <option value="">Select a Quiz...</option>
+                                    <% if(quizzes && quizzes.length) { %>
+                                        <% quizzes.forEach(q => { %>
+                                            <option value="<%= q._id %>" <%= (typeof selectedQuizId !== 'undefined' && selectedQuizId && q._id.toString() === selectedQuizId.toString()) ? 'selected' : '' %>><%= q.title %></option>
+                                        <% }) %>
+                                    <% } %>
+                                </select>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="/questions" class="btn btn-secondary me-md-2">Cancel</a>
+                                <button type="submit" class="btn btn-success">Save Question</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
