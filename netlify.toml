@@ -1,0 +1,14 @@
+[build]
+  base    = "client"
+  command = "npm run build"
+  publish = "client/dist"
+
+[build.environment]
+  # Set this in Netlify Dashboard → Site Settings → Environment Variables
+  # VITE_API_URL = https://your-backend.onrender.com/api
+
+# SPA fallback: all routes → index.html (required for React Router)
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
