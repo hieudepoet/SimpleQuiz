@@ -10,6 +10,8 @@ import {
 } from './questionSlice'
 import { fetchQuizzes, addExistingQuestionToQuiz, removeQuestionFromQuiz } from '../quiz/quizSlice'
 import type { Quiz } from '../quiz/quizSlice'
+import { useConfirm } from '../../components/useConfirm'
+import ConfirmModal from '../../components/ConfirmModal'
 
 const EMPTY_FORM = { text: '', options: ['', '', '', ''], correctAnswerIndex: 0, keywords: '' }
 
@@ -18,6 +20,7 @@ export default function QuestionsPage() {
   const { questions, loading, saving, error } = useAppSelector((s) => s.questions)
   const { quizzes } = useAppSelector((s) => s.quiz)
   const { user } = useAppSelector((s) => s.auth)
+  const { confirmState, confirm, handleConfirm: modalConfirm, handleCancel: modalCancel } = useConfirm()
 
   const [showForm, setShowForm] = useState(false)
   const [editingQ, setEditingQ] = useState<Question | null>(null)
@@ -35,17 +38,26 @@ export default function QuestionsPage() {
 
   const flash = (msg: string) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(''), 3000) }
 
-  const openCreate = () => {
-    if (isDirty && !window.confirm('Discard unsaved changes?')) return
+  const openCreate = async () => {
+    if (isDirty) {
+      const ok = await confirm({ title: 'Discard Changes', message: 'Discard unsaved changes?', confirmLabel: 'Discard', variant: 'warning' })
+      if (!ok) return
+    }
     setForm(EMPTY_FORM); setEditingQ(null); setIsDirty(false); setShowForm(true); dispatch(clearError())
   }
-  const openEdit = (q: Question) => {
-    if (isDirty && !window.confirm('Discard unsaved changes?')) return
+  const openEdit = async (q: Question) => {
+    if (isDirty) {
+      const ok = await confirm({ title: 'Discard Changes', message: 'Discard unsaved changes?', confirmLabel: 'Discard', variant: 'warning' })
+      if (!ok) return
+    }
     setForm({ text: q.text, options: [...q.options], correctAnswerIndex: q.correctAnswerIndex, keywords: q.keywords.join(', ') })
     setEditingQ(q); setIsDirty(false); setShowForm(true); dispatch(clearError())
   }
-  const handleCancel = () => {
-    if (isDirty && !window.confirm('You have unsaved changes. Are you sure you want to leave without saving?')) return
+  const handleCancel = async () => {
+    if (isDirty) {
+      const ok = await confirm({ title: 'Discard Changes', message: 'You have unsaved changes. Are you sure you want to leave without saving?', confirmLabel: 'Leave', variant: 'warning' })
+      if (!ok) return
+    }
     setForm(EMPTY_FORM); setEditingQ(null); setIsDirty(false); setShowForm(false)
   }
 
@@ -70,7 +82,13 @@ export default function QuestionsPage() {
   }
 
   const handleDelete = async (q: Question) => {
-    if (!window.confirm(`Are you sure you want to delete this question?\n"${q.text}"`)) return
+    const ok = await confirm({
+      title: 'Delete Question',
+      message: `Are you sure you want to delete this question?\n"${q.text}"`,
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    })
+    if (!ok) return
     const r = await dispatch(deleteStandaloneQuestion(q._id))
     if (deleteStandaloneQuestion.fulfilled.match(r)) flash('Question deleted.')
   }
@@ -84,7 +102,13 @@ export default function QuestionsPage() {
 
   // "Remove from Quiz" from question sidebar
   const handleRemoveFromQuiz = async (q: Question, quiz: Quiz) => {
-    if (!window.confirm(`Remove from "${quiz.title}"?`)) return
+    const ok = await confirm({
+      title: 'Remove from Quiz',
+      message: `Remove from "${quiz.title}"?`,
+      confirmLabel: 'Remove',
+      variant: 'warning',
+    })
+    if (!ok) return
     await dispatch(removeQuestionFromQuiz({ quizId: quiz._id, questionId: q._id, currentQuestions: quiz.questions }))
     dispatch(fetchQuizzes())
     flash(`Removed from "${quiz.title}"`)
@@ -99,6 +123,11 @@ export default function QuestionsPage() {
 
   return (
     <div className="container mt-4">
+      <ConfirmModal
+        {...confirmState}
+        onConfirm={modalConfirm}
+        onCancel={modalCancel}
+      />
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-bold text-primary">
           <i className="bi bi-question-diamond me-2"></i>Question Bank

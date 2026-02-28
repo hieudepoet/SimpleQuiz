@@ -30,8 +30,8 @@ export const login = createAsyncThunk(
     try {
       const res = await axiosClient.post('/auth/login', credentials)
       return res.data
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Login failed')
+    } catch (err: unknown) {
+      return rejectWithValue((err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Login failed')
     }
   }
 )
@@ -42,8 +42,8 @@ export const signup = createAsyncThunk(
     try {
       const res = await axiosClient.post('/auth/signup', data)
       return res.data
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Signup failed')
+    } catch (err: unknown) {
+      return rejectWithValue((err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Signup failed')
     }
   }
 )

@@ -11,6 +11,8 @@ import {
   clearSelectedQuiz,
 } from './quizSlice'
 import { fetchAllQuestions } from '../questions/questionSlice'
+import { useConfirm } from '../../components/useConfirm'
+import ConfirmModal from '../../components/ConfirmModal'
 
 const EMPTY_Q = { text: '', options: ['', '', '', ''], correctAnswerIndex: 0, keywords: '' }
 
@@ -23,6 +25,7 @@ export default function QuizDetailPage() {
   const { selectedQuiz, loading, error } = useAppSelector((s) => s.quiz)
   const { user } = useAppSelector((s) => s.auth)
   const { questions: allQuestions } = useAppSelector((s) => s.questions)
+  const { confirmState, confirm, handleConfirm, handleCancel } = useConfirm()
 
   const [showAdd, setShowAdd] = useState(false)
   const [addTab, setAddTab] = useState<AddTab>('existing')
@@ -53,14 +56,26 @@ export default function QuizDetailPage() {
   // Remove from quiz (don't delete)
   const handleRemoveFromQuiz = async (qId: string) => {
     if (!selectedQuiz || !id) return
-    if (!window.confirm('Remove this question from the quiz? (Question is NOT deleted from the bank)')) return
+    const ok = await confirm({
+      title: 'Remove from Quiz',
+      message: 'Remove this question from the quiz?\n(The question will NOT be deleted from the bank.)',
+      confirmLabel: 'Remove',
+      variant: 'warning',
+    })
+    if (!ok) return
     await dispatch(removeQuestionFromQuiz({ quizId: id, questionId: qId, currentQuestions: selectedQuiz.questions }))
     refresh()
   }
 
   // Delete question entirely
   const handleDeletePermanently = async (qId: string) => {
-    if (!window.confirm('PERMANENTLY delete this question? It will be removed from ALL quizzes.')) return
+    const ok = await confirm({
+      title: 'Delete Permanently',
+      message: 'PERMANENTLY delete this question?\nIt will be removed from ALL quizzes.',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    })
+    if (!ok) return
     await dispatch(deleteQuestion({ questionId: qId }))
     refresh()
   }
@@ -114,6 +129,11 @@ export default function QuizDetailPage() {
 
   return (
     <div className="container mt-4">
+      <ConfirmModal
+        {...confirmState}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
       <a className="text-decoration-none text-muted mb-2 d-inline-block" onClick={() => navigate('/quizzes')} style={{ cursor: 'pointer' }}>
         ← Back to List
       </a>

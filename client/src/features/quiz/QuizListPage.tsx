@@ -2,23 +2,38 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { fetchQuizzes, deleteQuiz } from './quizSlice'
+import { useConfirm } from '../../components/useConfirm'
+import ConfirmModal from '../../components/ConfirmModal'
 
 export default function QuizListPage() {
   const dispatch = useAppDispatch()
   const { quizzes, loading, error } = useAppSelector((s) => s.quiz)
   const { user } = useAppSelector((s) => s.auth)
+  const { confirmState, confirm, handleConfirm, handleCancel } = useConfirm()
 
   useEffect(() => {
     dispatch(fetchQuizzes())
   }, [dispatch])
 
   const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Delete quiz "${title}"?`)) return
+    const ok = await confirm({
+      title: 'Delete Quiz',
+      message: `Are you sure you want to delete the quiz "${title}"?`,
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    })
+    if (!ok) return
     dispatch(deleteQuiz(id))
   }
 
   return (
     <div className="container py-5">
+      <ConfirmModal
+        {...confirmState}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
+
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="fw-bold text-primary mb-1">
